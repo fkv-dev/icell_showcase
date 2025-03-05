@@ -1,0 +1,12 @@
+{
+  "fileName": "vehicle_gps_data_?.xlsx",
+  "sheetName": "Vehicle GPS Data",
+  "headers": [
+    "RENDSZÁM",
+    "ESEMÉNY NAPJA",
+    "GPS VÉTEL MINŐSÉGE",
+    "NAPI MEGTETT TÁVOLSÁG",
+    "MAXIMÁLIS SEBESSÉG",
+    "JELENLEGI POZÍCIÓ"
+  ]
+}
