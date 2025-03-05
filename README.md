@@ -1,5 +1,5 @@
-# Jármű adatainak a feldolgozása 
-## Kötelező beállítás
+# Jármű adatainak a feldolgozása és adatok letöltése 📥🚛
+## Kötelező beállítás ❗
 Mavenben meg kell adni az url, felhasználó és jelszó értékeket.
 A Maven pom.xml fájlban kell a properties-ben értéket módosítani.
 - app.test.api.url,
