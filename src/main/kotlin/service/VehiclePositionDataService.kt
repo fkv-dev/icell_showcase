@@ -32,10 +32,8 @@ class VehiclePositionDataService {
 
     @Value("\${app.test.api.url}")
     lateinit var testApiUrl: String
-
     @Value("\${app.test.api.user}")
     lateinit var testApiUser: String
-
     @Value("\${app.test.api.pass}")
     lateinit var testApiPass: String
 

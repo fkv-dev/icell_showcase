@@ -17,11 +17,19 @@ class VehiclePositionDataController(private val vehiclePositionDataService: Vehi
         private val logger: Logger = LogManager.getLogger(VehiclePositionDataController::class.java)
     }
 
+    /**
+     * Letölti és feldolgozza a jármű adatokat
+     * @return json szövegként adja ki
+     */
     @GetMapping("/raw-json")
     fun getData(): ResponseEntity<List<VehicleGpsDisplayData>> {
         return ResponseEntity.ok(vehiclePositionDataService.getAggregateVehicleGpsDataJson())
     }
 
+    /**
+     * Letölti és feldolgozza a jármű adatokat
+     * @return Excelben adja ki
+     */
     @GetMapping("/excel")
     fun downloadVehicleGpsDataExcel(): ResponseEntity<ByteArray> {
         val vehGpsDisList = vehiclePositionDataService.getAggregateVehicleGpsDataJson()
