@@ -108,7 +108,7 @@ class VehiclePositionDataService {
         //Rendszámonként végigmegy minden járművön
         return rawVehList.flatMap { vehicle ->
             //Az adott jármű napjait szétbontja
-            val positionsByDay = vehicle.positions?.groupBy { it.t.toLocalDate() } ?: emptyMap()
+            val positionsByDay = vehicle.positions.groupBy { it.t.toLocalDate() }
             //Megcsinálja a feldolgozást és eredménylistát készít.
             positionsByDay.mapNotNull { (eventDay, positions) ->
                 val maxDateClass = positions.maxByOrNull { it.t }
@@ -121,15 +121,16 @@ class VehiclePositionDataService {
                         positions.count { !it.gpsFix }
                     )
                     val maximumSpeed = positions.maxOfOrNull { it.gpsSpeed } ?: 0
-                    val gpsReceptionQualityDisp =
-                        "$gpsReceptionQuality% (${positions.count { it.gpsFix }}/${positions.count { !it.gpsFix }})"
-                    val currentPosition =
-                        "${maxDateClass.city}, ${maxDateClass.road ?: "-"} | lat:${maxDateClass.gpsLat}/lon:${maxDateClass.gpsLon}"
+                    val currentPosition = buildString {
+                        append(maxDateClass.city)
+                        append(", ${maxDateClass.road ?: "-"}")
+                        append(" | lat:${maxDateClass.gpsLat}/lon:${maxDateClass.gpsLon}")
+                    }
                     //Eredmény egy sora
                     VehicleGpsDisplayData(
                         vehicle.licenseNo,
                         eventDay,
-                        gpsReceptionQualityDisp,
+                        gpsReceptionQuality,
                         dailyDistanceTravelled,
                         maximumSpeed,
                         currentPosition
@@ -167,14 +168,35 @@ class VehiclePositionDataService {
             cell.cellStyle = headerStyle
         }
         //Adatok beszúrása a cellákba
+        //TODO lekérni a jsonből a formátumot.
+        val numberCellStyle = workbook.createCellStyle()
+        val dateCellStyle = workbook.createCellStyle()
+        val percentageStyle = workbook.createCellStyle()
+        val dataFormat = workbook.createDataFormat()
+        numberCellStyle.dataFormat = dataFormat.getFormat("0.00")
+        dateCellStyle.dataFormat = dataFormat.getFormat("yyyy-MM-dd")
+        percentageStyle.dataFormat = dataFormat.getFormat("0.00%")
+
         vehGpsDisList.forEachIndexed { index, vehicle ->
             val row = sheet.createRow(index + 1)
             var colIndex = 0
             row.createCell(colIndex++).setCellValue(vehicle.licenseNo)
-            row.createCell(colIndex++).setCellValue(vehicle.eventDay.toString())
-            row.createCell(colIndex++).setCellValue(vehicle.gpsReceptionQuality)
-            row.createCell(colIndex++).setCellValue(vehicle.dailyDistanceTravelled.toString())
-            row.createCell(colIndex++).setCellValue(vehicle.maximumSpeed.toString())
+            row.createCell(colIndex++).apply {
+                setCellValue(vehicle.eventDay)
+                cellStyle = dateCellStyle
+            }
+            row.createCell(colIndex++).apply {
+                setCellValue(vehicle.getGpsReceptionQualityExcelValue()) //Mert az excel felszorozza 100-zal
+                cellStyle = percentageStyle
+            }
+            row.createCell(colIndex++).apply {
+                setCellValue(vehicle.dailyDistanceTravelled.toDouble())
+                cellStyle = numberCellStyle
+            }
+            row.createCell(colIndex++).apply {
+                setCellValue(vehicle.maximumSpeed.toDouble())
+                cellStyle = numberCellStyle
+            }
             row.createCell(colIndex).setCellValue(vehicle.currentPosition)
         }
         //Cellákat méretezi, úgy hogy olvasható legyen
