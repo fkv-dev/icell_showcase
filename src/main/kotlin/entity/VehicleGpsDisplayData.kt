@@ -13,6 +13,9 @@ class VehicleGpsDisplayData(
     val maximumSpeed: Int,
     val currentPosition: String){
 
+    /**
+     * Azért van rá szükség, mert az excel felszorozza százzal
+     */
     fun getGpsReceptionQualityExcelValue(): Double {
         return gpsReceptionQuality / 100
     }
