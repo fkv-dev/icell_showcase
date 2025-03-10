@@ -16,9 +16,10 @@ import org.apache.logging.log4j.Logger
 import org.springframework.http.*
 import com.fasterxml.jackson.core.type.TypeReference
 
-import hu.fkv.entity.VehicleGpsData
-import hu.fkv.entity.VehicleGpsDataExcelConfig
-import hu.fkv.entity.VehicleGpsDisplayData
+import hu.fkv.entity.vehiclepositiondata.VehicleGpsData
+import hu.fkv.entity.vehiclepositiondata.excelconfig.VehicleGpsDataExcelConfig
+import hu.fkv.entity.vehiclepositiondata.VehicleGpsDisplayData
+import hu.fkv.util.ExcelManager.getExcelFormatForKey
 import hu.fkv.util.MyConstant.objectMapper
 import hu.fkv.util.NumberProcessor
 import hu.fkv.util.TimeManager.getCurrentDateTimeAsString
@@ -50,7 +51,7 @@ class VehiclePositionDataService {
             logger.error("Vehicle response body is null")
             return emptyList()
         }
-        //Osztályá alakítja a json szöveget.
+        //Osztályá alakítja a json szöveget
         val parsedVehList: List<VehicleGpsData> = parseVehicleDataJson(vehRespData)
         //Feldolgozza az adatokat
         val vehGpsDisList: List<VehicleGpsDisplayData> = processVehicleGpsData(parsedVehList)
@@ -62,14 +63,14 @@ class VehiclePositionDataService {
      *
      * @return A hívás eredményét adja vissza, az adatok benne szövegesek.
      */
-    private fun downloadVehiclePositionData(): ResponseEntity<String> {
-        val headers = HttpHeaders()
-        val auth = "$testApiUser:$testApiPass"
-        val encodedAuth = Base64.getEncoder().encodeToString(auth.toByteArray())
-        headers.set("Authorization", "Basic $encodedAuth")
-        val entity = HttpEntity<String>(headers)
-
+    fun downloadVehiclePositionData(): ResponseEntity<String> {
         return try {
+            val headers = HttpHeaders()
+            println(testApiUser)
+            val auth = "$testApiUser:$testApiPass"
+            val encodedAuth = Base64.getEncoder().encodeToString(auth.toByteArray())
+            headers.set("Authorization", "Basic $encodedAuth")
+            val entity = HttpEntity<String>(headers)
             val response = restTemplate.exchange(testApiUrl, HttpMethod.GET, entity, String::class.java)
             response
         } catch (e: Exception) {
@@ -80,6 +81,7 @@ class VehiclePositionDataService {
 
     /**
      * A excel konfigurációs json-t olvasssa be.
+     *
      * @return A konfigurációs osztályát adja ki.
      */
     private fun readVehicleGpsDataExcelConfigJson(): VehicleGpsDataExcelConfig =
@@ -89,7 +91,7 @@ class VehiclePositionDataService {
         )
 
     /**
-     * A String jsont átalakítja osztályá ami a megfelelő adatsruktúrát veszi fel.
+     * A String jsont átalakítja osztályá, ami a megfelelő adatsruktúrát veszi fel
      *
      * @param vehRespDataJson Az api hívás által visszaadaott json
      * @return Az osztályá alakított adatok listája
@@ -161,43 +163,45 @@ class VehiclePositionDataService {
         font.fontHeightInPoints = 14
         headerStyle.setFont(font)
         //Fejléc adatok feltöltése adattal és stílussal.
-        val tableHeader = excelConfig.headers
+        val tableHeader = excelConfig.headers.map { it.name }
         tableHeader.forEachIndexed { index, header ->
             val cell = headerRow.createCell(index)
             cell.setCellValue(header)
             cell.cellStyle = headerStyle
         }
         //Adatok beszúrása a cellákba
-        //TODO lekérni a jsonből a formátumot.
-        val numberCellStyle = workbook.createCellStyle()
-        val dateCellStyle = workbook.createCellStyle()
-        val percentageStyle = workbook.createCellStyle()
-        val dataFormat = workbook.createDataFormat()
-        numberCellStyle.dataFormat = dataFormat.getFormat("0.00")
-        dateCellStyle.dataFormat = dataFormat.getFormat("yyyy-MM-dd")
-        percentageStyle.dataFormat = dataFormat.getFormat("0.00%")
-
         vehGpsDisList.forEachIndexed { index, vehicle ->
             val row = sheet.createRow(index + 1)
-            var colIndex = 0
-            row.createCell(colIndex++).setCellValue(vehicle.licenseNo)
-            row.createCell(colIndex++).apply {
+            var colIndex = excelConfig.getKeyPosition("licenseNo")
+            row.createCell(colIndex).apply {
+                setCellValue(vehicle.licenseNo)
+                cellStyle = getExcelFormatForKey(excelConfig.headers[colIndex].columnFormat, workbook)
+            }
+            colIndex = excelConfig.getKeyPosition("eventDay")
+            row.createCell(colIndex).apply {
                 setCellValue(vehicle.eventDay)
-                cellStyle = dateCellStyle
+                cellStyle = getExcelFormatForKey(excelConfig.headers[colIndex].columnFormat, workbook)
             }
-            row.createCell(colIndex++).apply {
+            colIndex = excelConfig.getKeyPosition("gpsReceptionQuality")
+            row.createCell(colIndex).apply {
                 setCellValue(vehicle.getGpsReceptionQualityExcelValue()) //Mert az excel felszorozza 100-zal
-                cellStyle = percentageStyle
+                cellStyle = getExcelFormatForKey(excelConfig.headers[colIndex].columnFormat, workbook)
             }
-            row.createCell(colIndex++).apply {
+            colIndex = excelConfig.getKeyPosition("dailyDistanceTravelled")
+            row.createCell(colIndex).apply {
                 setCellValue(vehicle.dailyDistanceTravelled.toDouble())
-                cellStyle = numberCellStyle
+                cellStyle = getExcelFormatForKey(excelConfig.headers[colIndex].columnFormat, workbook)
             }
-            row.createCell(colIndex++).apply {
+            colIndex = excelConfig.getKeyPosition("maximumSpeed")
+            row.createCell(colIndex).apply {
                 setCellValue(vehicle.maximumSpeed.toDouble())
-                cellStyle = numberCellStyle
+                cellStyle = getExcelFormatForKey(excelConfig.headers[colIndex].columnFormat, workbook)
             }
-            row.createCell(colIndex).setCellValue(vehicle.currentPosition)
+            colIndex = excelConfig.getKeyPosition("currentPosition")
+            row.createCell(colIndex).apply {
+                setCellValue(vehicle.currentPosition)
+                cellStyle = getExcelFormatForKey(excelConfig.headers[colIndex].columnFormat, workbook)
+            }
         }
         //Cellákat méretezi, úgy hogy olvasható legyen
         for (i in 0 until sheet.getRow(0).lastCellNum) {

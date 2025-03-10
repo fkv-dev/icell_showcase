@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
 
-import hu.fkv.entity.VehicleGpsDisplayData
+import hu.fkv.entity.vehiclepositiondata.VehicleGpsDisplayData
 import hu.fkv.service.VehiclePositionDataService
 
 @RestController

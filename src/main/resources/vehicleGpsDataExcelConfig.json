@@ -2,11 +2,35 @@
   "fileName": "vehicle_gps_data_?.xlsx",
   "sheetName": "Vehicle GPS Data",
   "headers": [
-    "RENDSZÁM",
-    "ESEMÉNY NAPJA",
-    "GPS VÉTEL MINŐSÉGE",
-    "NAPI MEGTETT TÁVOLSÁG",
-    "MAXIMÁLIS SEBESSÉG",
-    "JELENLEGI POZÍCIÓ"
+    {
+      "name": "RENDSZÁM",
+      "columnFormat": "Text",
+      "key": "licenseNo"
+    },
+    {
+      "name": "ESEMÉNY NAPJA",
+      "columnFormat": "Date",
+      "key": "eventDay"
+    },
+    {
+      "name": "GPS VÉTEL MINŐSÉGE",
+      "columnFormat": "Percentage",
+      "key": "gpsReceptionQuality"
+    },
+    {
+      "name": "NAPI MEGTETT TÁVOLSÁG",
+      "columnFormat": "Number",
+      "key": "dailyDistanceTravelled"
+    },
+    {
+      "name": "MAXIMÁLIS SEBESSÉG",
+      "columnFormat": "Number",
+      "key": "maximumSpeed"
+    },
+    {
+      "name": "JELENLEGI POZÍCIÓ",
+      "columnFormat": "Text",
+      "key": "currentPosition"
+    }
   ]
 }

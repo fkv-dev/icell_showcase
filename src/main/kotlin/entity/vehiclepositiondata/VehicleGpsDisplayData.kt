@@ -1,4 +1,4 @@
-package hu.fkv.entity
+package hu.fkv.entity.vehiclepositiondata
 
 import java.time.LocalDate
 
