@@ -84,7 +84,7 @@ class VehiclePositionDataService {
      *
      * @return A konfigurációs osztályát adja ki.
      */
-    private fun readVehicleGpsDataExcelConfigJson(): VehicleGpsDataExcelConfig =
+    fun readVehicleGpsDataExcelConfigJson(): VehicleGpsDataExcelConfig =
         objectMapper.readValue(
             ClassPathResource("vehicleGpsDataExcelConfig.json").inputStream.bufferedReader().use { it.readText() },
             VehicleGpsDataExcelConfig::class.java
@@ -146,10 +146,13 @@ class VehiclePositionDataService {
      * Excelt generál a kapott adatokból
      *
      * @param vehGpsDisList A megjelenítendő lista
+     * @param excelConfig Excel konfigurációja. Tartalma: Oszlopnév, oszlop típusa, értékhezköthető kulcs stb.
      * @return az excel fájlt adja ki
      */
-    fun getVehicleGpsDataExcel(vehGpsDisList :List<VehicleGpsDisplayData>): ResponseEntity<ByteArray>{
-        val excelConfig = readVehicleGpsDataExcelConfigJson()
+    fun getVehicleGpsDataExcel(
+        vehGpsDisList: List<VehicleGpsDisplayData>,
+        excelConfig: VehicleGpsDataExcelConfig,
+    ): ByteArray {
         val workbook = XSSFWorkbook()
         val sheet = workbook.createSheet(excelConfig.sheetName)
         val headerRow = sheet.createRow(0)
@@ -214,23 +217,7 @@ class VehiclePositionDataService {
         val outputStream = ByteArrayOutputStream()
         workbook.write(outputStream)
         workbook.close()
-        //Hívás fejlécének a beállíása
-        val httpHeaders = HttpHeaders()
-        val excelFileName =
-            excelConfig.fileName.replace(
-                "?",
-                buildString {
-                    append(getCurrentDateTimeAsString())
-                    append("_")
-                    append((0..1000).random())
-                }
-            )
-        httpHeaders.add(
-            HttpHeaders.CONTENT_DISPOSITION,
-            "attachment; filename=${excelFileName}"
-        )
-        return ResponseEntity.ok()
-            .headers(httpHeaders)
-            .body(outputStream.toByteArray())
+        //Excel kiadása
+        return outputStream.toByteArray()
     }
 }

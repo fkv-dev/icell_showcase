@@ -9,6 +9,8 @@ import org.apache.logging.log4j.Logger
 
 import hu.fkv.entity.vehiclepositiondata.VehicleGpsDisplayData
 import hu.fkv.service.VehiclePositionDataService
+import hu.fkv.util.TimeManager.getCurrentDateTimeAsString
+import org.springframework.http.HttpHeaders
 
 @RestController
 @RequestMapping("/vehicle-data")
@@ -33,6 +35,26 @@ class VehiclePositionDataController(private val vehiclePositionDataService: Vehi
     @GetMapping("/excel")
     fun downloadVehicleGpsDataExcel(): ResponseEntity<ByteArray> {
         val vehGpsDisList = vehiclePositionDataService.getAggregateVehicleGpsDataJson()
-        return vehiclePositionDataService.getVehicleGpsDataExcel(vehGpsDisList)
+        val excelConfig = vehiclePositionDataService.readVehicleGpsDataExcelConfigJson()
+        val excelByteArray = vehiclePositionDataService.getVehicleGpsDataExcel(vehGpsDisList, excelConfig)
+        //Hívás fejlécének a beállíása
+        val httpHeaders = HttpHeaders()
+        val excelFileName =
+            excelConfig.fileName.replace(
+                "?",
+                buildString {
+                    append(getCurrentDateTimeAsString())
+                    append("_")
+                    append((0..1000).random())
+                }
+            )
+        httpHeaders.add(
+            HttpHeaders.CONTENT_DISPOSITION,
+            "attachment; filename=${excelFileName}"
+        )
+        //Kiadja az excelt
+        return ResponseEntity.ok()
+            .headers(httpHeaders)
+            .body(excelByteArray)
     }
 }
