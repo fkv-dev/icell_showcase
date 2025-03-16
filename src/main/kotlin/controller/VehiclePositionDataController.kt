@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
+import org.springframework.http.HttpHeaders
 
 import hu.fkv.entity.vehiclepositiondata.VehicleGpsDisplayData
 import hu.fkv.service.VehiclePositionDataService
 import hu.fkv.util.TimeManager.getCurrentDateTimeAsString
-import org.springframework.http.HttpHeaders
 
 @RestController
 @RequestMapping("/vehicle-data")

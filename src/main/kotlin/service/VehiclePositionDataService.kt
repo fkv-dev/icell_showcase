@@ -22,8 +22,6 @@ import hu.fkv.entity.vehiclepositiondata.VehicleGpsDisplayData
 import hu.fkv.util.ExcelManager.getExcelFormatForKey
 import hu.fkv.util.MyConstant.objectMapper
 import hu.fkv.util.NumberProcessor
-import hu.fkv.util.TimeManager.getCurrentDateTimeAsString
-
 
 @Service
 class VehiclePositionDataService {
@@ -51,6 +49,7 @@ class VehiclePositionDataService {
             logger.error("Vehicle response body is null")
             return emptyList()
         }
+
         //Osztályá alakítja a json szöveget
         val parsedVehList: List<VehicleGpsData> = parseVehicleDataJson(vehRespData)
         //Feldolgozza az adatokat
@@ -66,7 +65,6 @@ class VehiclePositionDataService {
     fun downloadVehiclePositionData(): ResponseEntity<String> {
         return try {
             val headers = HttpHeaders()
-            println(testApiUser)
             val auth = "$testApiUser:$testApiPass"
             val encodedAuth = Base64.getEncoder().encodeToString(auth.toByteArray())
             headers.set("Authorization", "Basic $encodedAuth")
@@ -187,7 +185,7 @@ class VehiclePositionDataService {
             }
             colIndex = excelConfig.getKeyPosition("gpsReceptionQuality")
             row.createCell(colIndex).apply {
-                setCellValue(vehicle.getGpsReceptionQualityExcelValue()) //Mert az excel felszorozza 100-zal
+                setCellValue(vehicle.gpsReceptionQualityExcelValue()) //Mert az excel felszorozza 100-zal
                 cellStyle = getExcelFormatForKey(excelConfig.headers[colIndex].columnFormat, workbook)
             }
             colIndex = excelConfig.getKeyPosition("dailyDistanceTravelled")
